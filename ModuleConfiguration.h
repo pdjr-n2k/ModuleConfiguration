@@ -13,8 +13,6 @@ class ModuleConfiguration {
     bool interact(int value = 0xffff, bool longPress = false);
     void initialise();
 
-    bool inUse();
-
     void save();
     void load();
 
