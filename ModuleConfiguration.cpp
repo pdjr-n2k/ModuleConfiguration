@@ -64,8 +64,10 @@ bool ModuleConfiguration::interact(int value, bool longPress) {
   return(retval);
 }
 
-void ModuleConfiguration::initialise() {
-  if (this->initialiser) this->initialiser();
+bool ModuleConfiguration::initialise() {
+  bool retval = false;
+  if (this->initialiser) retval = this->initialiser();
+  return(retval);
 }
 
 void ModuleConfiguration::save() {

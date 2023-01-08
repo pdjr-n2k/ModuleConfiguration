@@ -11,7 +11,7 @@ class ModuleConfiguration {
     unsigned char getByte(unsigned int index);
 
     bool interact(int value = 0xffff, bool longPress = false);
-    void initialise();
+    bool initialise();
 
     void save();
     void load();
