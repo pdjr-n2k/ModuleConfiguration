@@ -4,11 +4,14 @@
 class ModuleConfiguration {
 
   public:
-    ModuleConfiguration(unsigned int size, unsigned int eepromAddress = 0, void (*callback)(unsigned int, unsigned char) = 0);
+    ModuleConfiguration(unsigned int size, unsigned int eepromAddress = 0, void (*changeHandler)(unsigned int, unsigned char) = 0);
+    void setInitialiser(bool (*initialiser)());
+
     void setByte(unsigned int index, unsigned char value);
     unsigned char getByte(unsigned int index);
 
-    bool ModuleConfiguration::interact(int value, bool longPress);
+    bool interact(int value = 0xffff, bool longPress = false);
+    void initialise();
 
     bool inUse();
 
@@ -18,7 +21,9 @@ class ModuleConfiguration {
   private:
     unsigned int size;
     unsigned int eepromAddress;
-    void (*callback)(unsigned int address, unsigned char value);
+    unsigned long interactionTimeout;
+    void (*changeHandler)(unsigned int address, unsigned char value);
+    bool (*initialiser)();
   
     unsigned char *configuration;
     
