@@ -1,10 +1,7 @@
-#include <cstdlib>
-#include <Arduino.h>
-#include <EEPROM.h>
 #include "ModuleConfiguration.h"
 
-ModuleConfiguration::ModuleConfiguration(unsigned int size, unsigned int eepromAddress, void (*changeHandler)(unsigned int, unsigned char)) {
-  this->size = size;
+ModuleConfiguration::ModuleConfiguration(unsigned int eepromAddress, void (*changeHandler)(unsigned int, unsigned char)) {
+  this->size = 0;
   this->eepromAddress = eepromAddress;
   this->changeHandler = changeHandler;
   this->interactionTimeout = 30000UL;
@@ -13,13 +10,10 @@ ModuleConfiguration::ModuleConfiguration(unsigned int size, unsigned int eepromA
   for (unsigned int i = 0; i < this->size; i++) this->configuration[i] = 0xff;
 }
 
-void ModuleConfiguration::setInitialiser(bool (*initialiser)()) {
-  this->initialiser = initialiser;
-}
-
 void ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
   if (index < this->size) {
-    this->configuration[index] = value;
+    EEPROM.put(index, this->configuration[index] = value);
+    if (this->changeHandler) this->changeHandler(index, value);
   }
 }
 
@@ -54,7 +48,6 @@ bool ModuleConfiguration::interact(int value, bool longPress) {
       case false:
         if (address != -1) {
           this->setByte(address, (unsigned char) value);
-          if (this->changeHandler) this->changeHandler(address, (unsigned char) value);
           address = -1;
           retval = false;
         }
@@ -64,10 +57,11 @@ bool ModuleConfiguration::interact(int value, bool longPress) {
   return(retval);
 }
 
-bool ModuleConfiguration::initialise() {
-  bool retval = false;
-  if (this->initialiser) retval = this->initialiser();
-  return(retval);
+void ModuleConfiguration::initialise(unsigned char* (*initialiser)(int& size)) {
+  int size;
+  this->configuration = initialiser(size);
+  this->size = size;
+  this->save();
 }
 
 void ModuleConfiguration::save() {
