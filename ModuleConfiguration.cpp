@@ -64,6 +64,10 @@ void ModuleConfiguration::initialise(unsigned char* (*initialiser)(int& size)) {
   this->save();
 }
 
+void ModuleConfiguration::saveByte(unsigned int index) {
+  EEPROM.put(this->eepromAddress + index, this->configuration[index]);
+}
+
 void ModuleConfiguration::save() {
   EEPROM.put(this->eepromAddress, this->configuration);
 }
