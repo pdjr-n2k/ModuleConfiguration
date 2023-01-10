@@ -71,8 +71,19 @@ Initialise the configuration with the value returned from the host
 application function *initialiser* which must return an initialised
 configuration array and its size.
 
-Typically, an application will call this a maximum of once from within
-setup().
+The initialise() method must be called after a ModuleConfiguration
+has been instantiated and before further use.
+
+In an application which persists its configuration the initialiser
+function will typically:
+
+1. Create a static, dynamic, array big enough to hold the application's
+   configuration data.
+2. Load data into the array from the coniguration EEPROM address.
+3. If the loaded data has not been set up correctly then initialise
+   the configuration to some default state and save it.
+4. Return the prepared array and its size.
+
 ```
 #define CONFIG_SIZE 20
 
