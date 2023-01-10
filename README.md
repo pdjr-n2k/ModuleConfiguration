@@ -78,9 +78,11 @@ setup().
 
 unsigned char *initialiser(int &size, unsigned int eepromAddress) {
     static unsigned char *buffer;
-    buffer = new unsigned char[CONFIG_SIZE];
-    for (unsigned int i = 0; i < CONFIG_SIZE; i++) buffer[i] = 0x00;
-    size = CONFIG_SIZE;
+    buffer = new unsigned char[size = CONFIG_SIZE];
+    EEPROM.get(eepromAddress, buffer);
+    if (buffer[0] = 0xff) {
+      for (unsigned int i = 0; i < CONFIG_SIZE; i++) buffer[i] = 0x00;
+    }
     return(buffer);
 }
 
