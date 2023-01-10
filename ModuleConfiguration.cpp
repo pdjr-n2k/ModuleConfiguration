@@ -24,32 +24,51 @@ unsigned char ModuleConfiguration::getByte(unsigned int index) {
   return(0xff);
 }
 
-bool ModuleConfiguration::interact(int value, bool longPress) {
+/**********************************************************************
+ * 1 - the interaction event specified a valid parameter address and is
+ *     being handled.
+ * 2 - the interaction event specified a valid parameter value and has
+ *     been handled.
+ * 3 - a long press specified an address that was out of range.
+ * 4 - a short press specified a value but no previous address has
+ *     been specified.
+ * 5 - a short press specified a value for a previously out of range
+ *     address.
+*/
+
+int ModuleConfiguration::interact(int value, bool longPress) {
   static long resetDeadline = 0UL;
   static int address = -1;
   long now = millis();
-  bool retval = false;
+  int retval = 0;
    
   if (value == 0xffff) { // Perhaps cancel a timed-out protocol.
     if ((resetDeadline != 0UL) && (now > resetDeadline)) {
       address = -1;
       resetDeadline = 0UL;
-      retval = false;
     }
   } else {
     switch (longPress) {
       case true:
         if ((value >= 0) && (value < EEPROM.length())) {
           address = value;
-          retval = true;
+          retval = 1;
           resetDeadline = (now + this->interactionTimeout);
+        } else {
+          retval = 3;
         }
         break;
       case false:
         if (address != -1) {
-          this->setByte(address, (unsigned char) value);
-          address = -1;
-          retval = false;
+          if ((address >= 0) && (address < EEPROM.length())) {
+            this->setByte(address, (unsigned char) value);
+            address = -1;
+            retval = 2;
+          } else {
+            retval = 5;
+          }
+        } else {
+          retval = 4;
         }
         break;
     }
@@ -59,13 +78,12 @@ bool ModuleConfiguration::interact(int value, bool longPress) {
 
 void ModuleConfiguration::initialise(unsigned char* (*initialiser)(int& size)) {
   int size;
-  this->configuration = initialiser(size, this->eepromAddress);
-  this->size = size;
+  this->configuration = initialiser(this->size, this->eepromAddress);
   this->save();
 }
 
 void ModuleConfiguration::saveByte(unsigned int index) {
-  EEPROM.put(this->eepromAddress + index, this->configuration[index]);
+  EEPROM.update(this->eepromAddress + index, this->configuration[index]);
 }
 
 void ModuleConfiguration::save() {

@@ -12,7 +12,7 @@ class ModuleConfiguration {
     void setByte(unsigned int index, unsigned char value);
     unsigned char getByte(unsigned int index);
 
-    bool interact(int value = 0xffff, bool longPress = false);
+    int interact(int value = 0xffff, bool longPress = false);
     void initialise(unsigned char* (*initialiser)(int& size, unsigned int eepromAddress));
 
     void save();
