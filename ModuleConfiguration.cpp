@@ -1,6 +1,6 @@
 #include "ModuleConfiguration.h"
 
-ModuleConfiguration::ModuleConfiguration(unsigned int eepromAddress, void (*changeHandler)(unsigned int, unsigned char)) {
+ModuleConfiguration::ModuleConfiguration(unsigned int eepromAddress, bool (*changeHandler)(unsigned int, unsigned char)) {
   this->size = 0;
   this->eepromAddress = eepromAddress;
   this->changeHandler = changeHandler;
@@ -12,8 +12,10 @@ ModuleConfiguration::ModuleConfiguration(unsigned int eepromAddress, void (*chan
 
 void ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
   if (index < this->size) {
-    EEPROM.put(index, this->configuration[index] = value);
-    if (this->changeHandler) this->changeHandler(index, value);
+    if ((this->changeHandler == 0) or (this->changeHandler(index, value))) {
+      this->configuration[index] = value;
+      this->saveByte(index);
+    }
   }
 }
 

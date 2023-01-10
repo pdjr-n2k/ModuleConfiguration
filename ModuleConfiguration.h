@@ -7,7 +7,7 @@
 class ModuleConfiguration {
 
   public:
-    ModuleConfiguration(unsigned int eepromAddress = 0, void (*changeHandler)(unsigned int, unsigned char) = 0);
+    ModuleConfiguration(unsigned int eepromAddress = 0, bool (*changeHandler)(unsigned int, unsigned char) = 0);
 
     void setByte(unsigned int index, unsigned char value);
     unsigned char getByte(unsigned int index);
@@ -22,7 +22,7 @@ class ModuleConfiguration {
   private:
     unsigned int eepromAddress;
     unsigned long interactionTimeout;
-    void (*changeHandler)(unsigned int address, unsigned char value);
+    bool (*changeHandler)(unsigned int address, unsigned char value);
   
     unsigned char *configuration;
     unsigned char size = 0;

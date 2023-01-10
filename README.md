@@ -4,8 +4,9 @@ Class implementing an array of bytes intended for use as a repository
 for firmware configuration data.
 Methods allow initialisation, interactive updates and use of persistent
 storage.
-Typically, a module configuration instance will be created and
-initialised (see the initialise() method) before use. 
+
+A ModuleConfiguration instance must be initialised before use by a call
+to the initialise() method. 
 
 ## CONSTRUCTORS
 
@@ -23,16 +24,19 @@ address of *eepromAddress*.
 
 Create a new ModuleConfiguration instance with an EEPROM storage
 address of *eepromAddress*.
-*changeHandler* is a callback function which will be invoked each time
-the value of a configuration byte changes with the index of the changed
-byte and its new value as arguments.
-This allows the host application to respond to a configuration change
-as it sees fit.
+
+*changeHandler* is an optional callback function which will be invoked
+each time the value of a configuration byte is about to be updated with
+the index of the changed byte and its new value as arguments.
+If *changeHandler* is specified, then it should return true if the
+update should proceed, or false if the update should be discarded. 
+In the former case, *changeHandler* might also take the opportunity to
+update any host application users of the changed configuration value.
 ```
 #define CONFIGURATION_EEPROM_ADDRESS 0
 
-void myChangeHandler(unsigned int index, unsigned char value) {
-    EEPROM.put(CONFIGURATION_EEPROM_ADDRESS + index, value);
+bool myChangeHandler(unsigned int index, unsigned char value) {
+  return(value < 128);
 }
 
 ModuleConfiguration myModuleConfiguration(CONFIGURATION_EEPROM_ADDRESS, myChangeHandler);
@@ -77,23 +81,21 @@ affected address and its new value as arguments.
 
 ### initialise(*initialiser*)
 
-Initialise the configuration with the value returned from the host
-application function *initialiser* which must return an initialised
-configuration array and its size.
+Invokes the *initialiser* callback function which should create,
+initialise and return a pointer to a static memory buffer holding
+the module configuration byte array.
+*initialiser* is called with two arguments: the first is a
+reference to a variable that should be used to pass back the size
+of the created array and the second is the EEPROM address that was
+passed to the instance constructor.
 
-
-The initialise() method must be called after a ModuleConfiguration
-has been instantiated and before further use.
-
-In an application which persists its configuration the initialiser
-function will typically:
-
-1. Create a static, dynamic, array big enough to hold the application's
-   configuration data.
-2. Load data into the array from the coniguration EEPROM address.
-3. If the loaded data has not been set up correctly then initialise
-   the configuration to some default state and save it.
-4. Return the prepared array and its size.
+*initialiser* must create a dynamically allocated buffer of a size
+sufficient to hold the module configuration.
+Typically it will attempt to load any saved configuration into the
+buffer.
+If, for whatever reason, there is no saved configuration then the
+function should prepare buffer for use in whatever way is
+appropriate.
 
 ```
 #define CONFIG_SIZE 20
@@ -111,12 +113,17 @@ unsigned char *initialiser(int &size, unsigned int eepromAddress) {
 myModuleConfig.initialise(initialiser);
 ```
 
+### saveByte(*index*)
+
+Save the configuration byte at *index* to EEPROM using the EEPROM
+library's update() method.
+
 ### save()
 
-Save the configuration to EEPROM, or, if no EEPROM address has been
-configured, silently do nothing.
+Save the configuration array to EEPROM using the EEPROM library's
+put() method.
 
 ### load()
 
-Load the configuration from EEPROM, or, if no EEPROM address has been
-configured, silently do nothing.
+Load the configuration array from EEPROM using the EEPROM library's
+get() method.
