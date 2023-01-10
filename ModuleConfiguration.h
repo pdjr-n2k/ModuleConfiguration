@@ -15,6 +15,7 @@ class ModuleConfiguration {
     int interact(int value = 0xffff, bool longPress = false);
     void initialise(unsigned char* (*initialiser)(int& size, unsigned int eepromAddress));
 
+    void saveByte(unsigned int index);
     void save();
     void load();
 

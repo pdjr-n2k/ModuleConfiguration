@@ -13,7 +13,7 @@ ModuleConfiguration::ModuleConfiguration(unsigned int eepromAddress, void (*chan
 void ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
   if (index < this->size) {
     EEPROM.put(index, this->configuration[index] = value);
-    if (this->changeHandler) this->changeHandler(0, index, value);
+    if (this->changeHandler) this->changeHandler(index, value);
   }
 }
 
@@ -69,9 +69,9 @@ int ModuleConfiguration::interact(int value, bool longPress) {
   return(retval);
 }
 
-void ModuleConfiguration::initialise(unsigned char* (*initialiser)(int& size)) {
+void ModuleConfiguration::initialise(unsigned char* (*initialiser)(int& size, unsigned int eepromAddress)) {
   int size;
-  this->configuration = initialiser(this->size, this->eepromAddress);
+  this->configuration = initialiser(size, this->eepromAddress);
   this->save();
 }
 
