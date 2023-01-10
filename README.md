@@ -2,7 +2,7 @@
 
 Class implementing an array of bytes intended for use as a repository
 for firmware configuration data.
-Methods allow initialisation, interactive updates and us of persistent
+Methods allow initialisation, interactive updates and use of persistent
 storage.
 Typically, a module configuration instance will be created and
 initialised (see the initialise() method) before use. 
@@ -76,7 +76,7 @@ setup().
 ```
 #define CONFIG_SIZE 20
 
-unsigned char *initialiser(int &size) {
+unsigned char *initialiser(int &size, unsigned int eepromAddress) {
     static unsigned char *buffer;
     buffer = new unsigned char[CONFIG_SIZE];
     for (unsigned int i = 0; i < CONFIG_SIZE; i++) buffer[i] = 0x00;
