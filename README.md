@@ -1,29 +1,45 @@
 # ModuleConfiguration
 
+Class implementing an array of bytes intended for use as a repository
+for firmware configuration data.
+Methods allow initialisation, interactive updates and us of persistent
+storage.
+Typically, a module configuration instance will be created and
+initialised (see the initialise() method) before use. 
+
 ## CONSTRUCTORS
 
-### ModuleConfiguration(*maxsize*)
+### ModuleConfiguration()
 
-Create a new ModuleConfiguration instance with a limit of *maxsize* bytes.
+Create a new ModuleConfiguration instance with an EEPROM storage
+address of 0.
 
-### ModuleConfiguration(*size*, *eepromAddress*)
+### ModuleConfiguration(*eepromAddress*)
 
-Create a new ModuleConfiguration instance with a limit of *size* bytes
-and an EEPROM start address of *eepromAddress*.
+Create a new ModuleConfiguration instance with an EEPROM storage
+address of *eepromAddress*.
 
-### ModuleConfiguration(*size*, *eepromAddress*, *changeHandler*)
+### ModuleConfiguration(*eepromAddress*, *changeHandler*)
 
-Create a new ModuleConfiguration instance with a limit of *size* bytes
-and an EEPROM start address of *eepromAddress*.
+Create a new ModuleConfiguration instance with an EEPROM storage
+address of *eepromAddress*.
 *changeHandler* is a callback function which will be invoked each time
-a configuration interaction results in a module configuration change.
+the value of a configuration byte changes with the index of the changed
+byte and its new value as arguments.
+This allows the host application to respond to a configuration change
+as it sees fit - perhaps, as in the following example, by persisting
+the configuration change to EEPROM.
+```
+#define CONFIGURATION_EEPROM_ADDRESS 0
+
+void myChangeHandler(unsigned int index, unsigned char value) {
+    EEPROM.put(CONFIGURATION_EEPROM_ADDRESS + index, value);
+}
+
+ModuleConfiguration myModuleConfiguration(CONFIGURATION_EEPROM_ADDRESS, myChangeHandler);
+```
 
 ## METHODS
-
-### setInitialiser(*initialiser*)
-
-Set the callback which will be invoked by the initialise() method to
-the function *initialiser*.
 
 ### setByte(*address*, *value*)
 
@@ -49,11 +65,27 @@ In the case that an interaction has completed and a change handler was
 registered at instantiation then the change handler is invoked with the
 affected address and its new value as arguments.
 
-### initialise()
+### initialise(*initialiser*)
 
-If the host application has previously registered an initialiser
-function then the initialiser is called and its return value returned
-as the result of the method call.
+Initialise the configuration with the value returned from the host
+application function *initialiser* which must return an initialised
+configuration array and its size.
+
+Typically, an application will call this a maximum of once from within
+setup().
+```
+#define CONFIG_SIZE 20
+
+unsigned char *initialiser(int &size) {
+    static unsigned char *buffer;
+    buffer = new unsigned char[CONFIG_SIZE];
+    for (unsigned int i = 0; i < CONFIG_SIZE; i++) buffer[i] = 0x00;
+    size = CONFIG_SIZE;
+    return(buffer);
+}
+
+myModuleConfig.initialise(initialiser);
+```
 
 ### save()
 

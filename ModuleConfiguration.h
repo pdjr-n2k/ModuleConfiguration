@@ -15,7 +15,6 @@ class ModuleConfiguration {
     bool interact(int value = 0xffff, bool longPress = false);
     void initialise(unsigned char* (*initialiser)(int& size));
 
-    void saveByte(unsigned int index);
     void save();
     void load();
 
