@@ -13,7 +13,7 @@ ModuleConfiguration::ModuleConfiguration(unsigned int eepromAddress, void (*chan
 void ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
   if (index < this->size) {
     EEPROM.put(index, this->configuration[index] = value);
-    if (this->changeHandler) this->changeHandler(index, value);
+    if (this->changeHandler) this->changeHandler(0, index, value);
   }
 }
 
@@ -25,16 +25,15 @@ unsigned char ModuleConfiguration::getByte(unsigned int index) {
 }
 
 /**********************************************************************
- * 1 - the interaction event specified a valid parameter address and is
- *     being handled.
- * 2 - the interaction event specified a valid parameter value and has
- *     been handled.
- * 3 - a long press specified an address that was out of range.
- * 4 - a short press specified a value but no previous address has
- *     been specified.
- * 5 - a short press specified a value for a previously out of range
- *     address.
-*/
+ * 0  a long press interaction specified an invalid address and has
+ *     been ignored.
+ * 1   a long press interaction specified a valid address and interact
+ *     is waiting for short press value to be supplied
+ * 2   a short press interaction specified a value for a previously
+ *     supplied address
+ * 3   a short press interaction occured without the presence of a
+ *     (previously specified) valid address.
+ */
 
 int ModuleConfiguration::interact(int value, bool longPress) {
   static long resetDeadline = 0UL;
@@ -52,23 +51,17 @@ int ModuleConfiguration::interact(int value, bool longPress) {
       case true:
         if ((value >= 0) && (value < EEPROM.length())) {
           address = value;
-          retval = 1;
           resetDeadline = (now + this->interactionTimeout);
-        } else {
-          retval = 3;
+          retval = 1;
         }
         break;
       case false:
         if (address != -1) {
-          if ((address >= 0) && (address < EEPROM.length())) {
-            this->setByte(address, (unsigned char) value);
-            address = -1;
-            retval = 2;
-          } else {
-            retval = 5;
-          }
+          this->setByte(address, (unsigned char) value);
+          address = -1;
+          retval = 2;
         } else {
-          retval = 4;
+          retval = 3;
         }
         break;
     }

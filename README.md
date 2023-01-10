@@ -55,9 +55,20 @@ Process an interaction event that has generated *value* as the result
 of a long or short button press as indicated by the boolean value
 *longPress*.
 
-The method returns boolean true if the interaction requires a
-subsequent invocation of the interact() method to complete and false
-if the interaction protocol is complete.
+The method returns one of the following integer values:
+
+0 says no action taken and none required.
+
+1 says a long press has been processed and the supplied value stored
+  as the configuration address to which a subsequent short press value
+  will be saved.
+
+2 says a short press has been processed and the supplied value stored
+  at the previously supplied configuration address.
+
+3 says a short press has been processed in the absence of a prior
+  storage address.
+
 This return value can be used by the host application to prompt or
 otherwise signify to a user the state of an interaction protocol.
 
