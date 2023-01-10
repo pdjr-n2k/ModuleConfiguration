@@ -72,6 +72,7 @@ int ModuleConfiguration::interact(int value, bool longPress) {
 void ModuleConfiguration::initialise(unsigned char* (*initialiser)(int& size, unsigned int eepromAddress)) {
   int size;
   this->configuration = initialiser(size, this->eepromAddress);
+  this->size = size;
   this->save();
 }
 

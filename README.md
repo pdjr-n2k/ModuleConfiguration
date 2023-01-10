@@ -27,8 +27,7 @@ address of *eepromAddress*.
 the value of a configuration byte changes with the index of the changed
 byte and its new value as arguments.
 This allows the host application to respond to a configuration change
-as it sees fit - perhaps, as in the following example, by persisting
-the configuration change to EEPROM.
+as it sees fit.
 ```
 #define CONFIGURATION_EEPROM_ADDRESS 0
 
@@ -81,6 +80,7 @@ affected address and its new value as arguments.
 Initialise the configuration with the value returned from the host
 application function *initialiser* which must return an initialised
 configuration array and its size.
+
 
 The initialise() method must be called after a ModuleConfiguration
 has been instantiated and before further use.
