@@ -1,21 +1,20 @@
 #include "ModuleConfiguration.h"
 
-ModuleConfiguration::ModuleConfiguration(unsigned int eepromAddress, bool (*changeHandler)(unsigned int, unsigned char)) {
-  this->size = 0;
+ModuleConfiguration::ModuleConfiguration(unsigned char* (*initialiser)(int&, unsigned int), bool (*changeHandler)(unsigned int, unsigned char), unsigned int eepromAddress) {
+  unsigned int size;
+
   this->eepromAddress = eepromAddress;
   this->changeHandler = changeHandler;
   this->interactionTimeout = 30000UL;
 
-  this->configuration = new unsigned char [this->size];
-  for (unsigned int i = 0; i < this->size; i++) this->configuration[i] = 0xff;
+  this->configuration = initialise(size, eepromAddress);
+  this->size = size;
 }
 
 void ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
-  if (index < this->size) {
-    if ((this->changeHandler == 0) or (this->changeHandler(index, value))) {
-      this->configuration[index] = value;
-      this->saveByte(index);
-    }
+  if ((index < this->size) && (this->changeHandler(index, value))) {
+    this->configuration[index] = value;
+    this->saveByte(index);
   }
 }
 
@@ -69,13 +68,6 @@ int ModuleConfiguration::interact(int value, bool longPress) {
     }
   }
   return(retval);
-}
-
-void ModuleConfiguration::initialise(unsigned char* (*initialiser)(int& size, unsigned int eepromAddress)) {
-  int size;
-  this->configuration = initialiser(size, this->eepromAddress);
-  this->size = size;
-  this->save();
 }
 
 void ModuleConfiguration::saveByte(unsigned int index) {

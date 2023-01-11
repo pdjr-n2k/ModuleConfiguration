@@ -6,47 +6,83 @@ Methods allow initialisation, interactive updates and use of persistent
 storage.
 
 A ModuleConfiguration instance must be initialised before use by a call
-to the initialise() method. 
+to the initialise() method.
+
+## Callback functions
+
+### unsigned char *initialiser*(unsigned int *size*&, unsigned int *eepromAddress*)
+
+The *initialiser* function is called from the class constructor must
+both create and prepare an array of ```unsigned char`` which will be
+used to hold module configuration data.
+The function must return a pointer to the array and must also pass the
+size of the array through the *size* reference.
+
+Configuration data is often persisted to EEPROM and hence it will be
+desiarable to restore persisted values to the array as part of the
+initialisation process.
+
+The following example function creates a configuration array, recovers
+data from EEPROM and checks if the recovered data hs actually been saved
+and, if not, proceeds to initialise all array items to 0x00.
+```
+#define CONFIGURATION_SIZE 20
+
+unsigned char *initialiser(unsigned int size&, unsigned int eepromAddress) {
+  static unsigned char buffer[] = new unsigned char(size = CONFIGURATION_SIZE);
+  EEPROM.get(eepromAddress, buffer);
+  if (buffer[0] == 0xff) {
+    for (insigned int i = 0; i < CONFIGURATION_SIZE; i++) {
+      buffer[i] = 0x00;
+    }
+  }
+  return(buffer);
+}
+
+### bool *validator*(unsigned int *index*, unsigned char *value*)
+
+The *validator* function is called from the setByte() method to
+allow the host application to validate *value* before it is assigned
+to configuration location *address*.
+
+If *validator* returns true, *value* will be saved, otherwise *value*
+will be discarded.
+
+The following example function with accept all data values which are
+even numbers.
+```
+bool validator(unsigned int index, unsigned char value) {
+  return(!(value & 0x01));
+}
+```
 
 ## CONSTRUCTORS
 
-### ModuleConfiguration()
+### ModuleConfiguration(*initialiser*, *validator*)
 
 Create a new ModuleConfiguration instance with an EEPROM storage
 address of 0.
+*initialiser* is a callback function which will be used to prepare
+the configuration for use.
+*validator* is a callback function which will be used to validate
+data values before they are assigned to the configuration.  
 
-### ModuleConfiguration(*eepromAddress*)
+### ModuleConfiguration(*initialiser*, *validator*, *eepromAddress*)
 
 Create a new ModuleConfiguration instance with an EEPROM storage
 address of *eepromAddress*.
-
-### ModuleConfiguration(*eepromAddress*, *changeHandler*)
-
-Create a new ModuleConfiguration instance with an EEPROM storage
-address of *eepromAddress*.
-
-*changeHandler* is an optional callback function which will be invoked
-each time the value of a configuration byte is about to be updated with
-the index of the changed byte and its new value as arguments.
-If *changeHandler* is specified, then it should return true if the
-update should proceed, or false if the update should be discarded. 
-In the former case, *changeHandler* might also take the opportunity to
-update any host application users of the changed configuration value.
-```
-#define CONFIGURATION_EEPROM_ADDRESS 0
-
-bool myChangeHandler(unsigned int index, unsigned char value) {
-  return(value < 128);
-}
-
-ModuleConfiguration myModuleConfiguration(CONFIGURATION_EEPROM_ADDRESS, myChangeHandler);
-```
+*initialiser* is a callback function which will be used to prepare
+the configuration for use.
+*validator* is a callback function which will be used to validate
+data values before they are assigned to the configuration.  
 
 ## METHODS
 
 ### setByte(*address*, *value*)
 
-Set the configuration byte at *address* to *value*.
+Validate *value* using the *validator* function declared at
+instantiation and, if *validator* returns true, save *value* to
+configuration location *index*. 
 
 ### getByte(*address*)
 
@@ -78,40 +114,6 @@ otherwise signify to a user the state of an interaction protocol.
 In the case that an interaction has completed and a change handler was
 registered at instantiation then the change handler is invoked with the
 affected address and its new value as arguments.
-
-### initialise(*initialiser*)
-
-Invokes the *initialiser* callback function which should create,
-initialise and return a pointer to a static memory buffer holding
-the module configuration byte array.
-*initialiser* is called with two arguments: the first is a
-reference to a variable that should be used to pass back the size
-of the created array and the second is the EEPROM address that was
-passed to the instance constructor.
-
-*initialiser* must create a dynamically allocated buffer of a size
-sufficient to hold the module configuration.
-Typically it will attempt to load any saved configuration into the
-buffer.
-If, for whatever reason, there is no saved configuration then the
-function should prepare buffer for use in whatever way is
-appropriate.
-
-```
-#define CONFIG_SIZE 20
-
-unsigned char *initialiser(int &size, unsigned int eepromAddress) {
-    static unsigned char *buffer;
-    buffer = new unsigned char[size = CONFIG_SIZE];
-    EEPROM.get(eepromAddress, buffer);
-    if (buffer[0] = 0xff) {
-      for (unsigned int i = 0; i < CONFIG_SIZE; i++) buffer[i] = 0x00;
-    }
-    return(buffer);
-}
-
-myModuleConfig.initialise(initialiser);
-```
 
 ### saveByte(*index*)
 

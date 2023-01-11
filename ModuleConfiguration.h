@@ -7,13 +7,12 @@
 class ModuleConfiguration {
 
   public:
-    ModuleConfiguration(unsigned int eepromAddress = 0, bool (*changeHandler)(unsigned int, unsigned char) = 0);
+    ModuleConfiguration(unsigned char* (*initialiser)(int&, unsigned int), bool (*changeHandler)(unsigned int, unsigned char), unsigned int eepromAddress = 0);
 
     void setByte(unsigned int index, unsigned char value);
     unsigned char getByte(unsigned int index);
 
     int interact(int value = 0xffff, bool longPress = false);
-    void initialise(unsigned char* (*initialiser)(int& size, unsigned int eepromAddress));
 
     void saveByte(unsigned int index);
     void save();
