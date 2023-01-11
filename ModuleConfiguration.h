@@ -9,6 +9,8 @@ class ModuleConfiguration {
   public:
     ModuleConfiguration(unsigned char* (*initialiser)(int&, unsigned int), bool (*changeHandler)(unsigned int, unsigned char), unsigned int eepromAddress = 0);
 
+    void setup();
+
     void setByte(unsigned int index, unsigned char value);
     unsigned char getByte(unsigned int index);
 
@@ -19,12 +21,13 @@ class ModuleConfiguration {
     void load();
 
   private:
+    unsigned char* (*initialiser)(int&, unsigned int)
+    bool (*validator)(unsigned int, unsigned char);
     unsigned int eepromAddress;
-    unsigned long interactionTimeout;
-    bool (*changeHandler)(unsigned int address, unsigned char value);
-  
-    unsigned char *configuration;
-    unsigned char size = 0;
+
+    unsigned long interactionTimeout = 30000UL;
+    unsigned char *configuration = 0;
+    unsigned int size = 0;
     
 };
 

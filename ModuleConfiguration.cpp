@@ -1,13 +1,15 @@
 #include "ModuleConfiguration.h"
 
-ModuleConfiguration::ModuleConfiguration(unsigned char* (*initialiser)(int&, unsigned int), bool (*changeHandler)(unsigned int, unsigned char), unsigned int eepromAddress) {
-  unsigned int size;
-
+ModuleConfiguration::ModuleConfiguration(unsigned char* (*initialiser)(int&, unsigned int), bool (*validator)(unsigned int, unsigned char), unsigned int eepromAddress) {
+  this->initialiser = initialiser;
+  this->validator = validator;
   this->eepromAddress = eepromAddress;
-  this->changeHandler = changeHandler;
-  this->interactionTimeout = 30000UL;
+}
 
-  this->configuration = initialise(size, eepromAddress);
+void ModuleConfiguration::setup() {
+  int size;
+
+  this->initialiser(size, this->eepromAddress);
   this->size = size;
 }
 
