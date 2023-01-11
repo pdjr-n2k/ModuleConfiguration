@@ -13,11 +13,13 @@ void ModuleConfiguration::setup() {
   this->size = size;
 }
 
-void ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
-  if ((index < this->size) && (this->changeHandler(index, value))) {
+bool ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
+  if ((index < this->size) && (this->validator(index, value))) {
     this->configuration[index] = value;
     this->saveByte(index);
+    return(true);
   }
+  return(false);
 }
 
 unsigned char ModuleConfiguration::getByte(unsigned int index) {

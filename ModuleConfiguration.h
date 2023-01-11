@@ -11,7 +11,7 @@ class ModuleConfiguration {
 
     void setup();
 
-    void setByte(unsigned int index, unsigned char value);
+    bool setByte(unsigned int index, unsigned char value);
     unsigned char getByte(unsigned int index);
 
     int interact(int value = 0xffff, bool longPress = false);
@@ -21,7 +21,7 @@ class ModuleConfiguration {
     void load();
 
   private:
-    unsigned char* (*initialiser)(int&, unsigned int)
+    unsigned char* (*initialiser)(int&, unsigned int);
     bool (*validator)(unsigned int, unsigned char);
     unsigned int eepromAddress;
 
