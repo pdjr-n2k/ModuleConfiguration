@@ -27,14 +27,15 @@ unsigned char ModuleConfiguration::getByte(unsigned int index) {
 }
 
 /**********************************************************************
- * 0  a long press interaction specified an invalid address and has
- *     been ignored.
  * 1   a long press interaction specified a valid address and interact
  *     is waiting for short press value to be supplied
  * 2   a short press interaction specified a value for a previously
- *     supplied address
- * 3   a short press interaction occured without the presence of a
- *     (previously specified) valid address.
+ *     supplied address and the value has been saved to the
+ *     configuration.
+ * 0   Interaction not dealt with. A short press was presented without
+ *     a previous address. No action taken
+ * -1  a long press interaction specified an out-of-range configuration
+ *     address.
  */
 
 int ModuleConfiguration::interact(int value, bool longPress) {
@@ -55,15 +56,14 @@ int ModuleConfiguration::interact(int value, bool longPress) {
           address = value;
           resetDeadline = (now + this->interactionTimeout);
           retval = 1;
+        } else {
+          retval = -1;
         }
         break;
       case false:
         if (address != -1) {
-          this->setByte(address, (unsigned char) value);
+          retval = (this->setByte(address, (unsigned char) value))?2:-2;
           address = -1;
-          retval = 2;
-        } else {
-          retval = 3;
         }
         break;
     }
