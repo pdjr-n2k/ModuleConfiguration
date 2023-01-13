@@ -70,7 +70,7 @@ data values before they are assigned to the configuration.
 ### ModuleConfiguration(*initialiser*, *validator*, *eepromAddress*)
 
 Create a new ModuleConfiguration instance with an EEPROM storage
-address of *eepromAddress*.
+address specified by unsigned int *eepromAddress*.
 *initialiser* is a callback function which will be used to prepare
 the configuration for use.
 *validator* is a callback function which will be used to validate
@@ -78,42 +78,57 @@ data values before they are assigned to the configuration.
 
 ## METHODS
 
-### setByte(*address*, *value*)
+### setByte(*index*, *value*)
 
 Validate *value* using the *validator* function declared at
 instantiation and, if *validator* returns true, save *value* to
 configuration location *index*. 
 
-### getByte(*address*)
+### getByte(*index*)
 
-Return the configuration byte at *address*.
+Return the configuration byte stored at configuration location
+*index*.
 
 ### interact(*value*, *longPress*)
 
-Process an interaction event that has generated *value* as the result
-of a long or short button press as indicated by the boolean value
-*longPress*.
+The method supports a two-step data entry protocal that can be used to
+update values in the module configuration array.
+Data is assumed to derive from an input register (most likely a DIL
+switch) and the interact() the method to be invoked by operation of a
+push-button.
+The method expects to be invoked each time the push-button is operated.
+Additionally, because the method implements a timeout mechanism, the
+method must be called from loop with no arguments.
 
-The method returns one of the following integer values:
+The supported protocol takes a long-button press to signify entry of a
+configuration array index and a short button press to signify entry of
+an array value.
+Together, the sequential entry of an index followed by a value supplies
+the data required for an array update.
 
-0 says no action taken and none required.
+If a data value does not follow an index value withing 30 seconds then
+the supplied index is discarded and the protocol reset.
+If a data value is entered without a preceeding index, then the supplied
+value is ignored and an exception reported.
 
-1 says a long press has been processed and the supplied value stored
-  as the configuration address to which a subsequent short press value
-  will be saved.
+The status of protocol processing is indicated by the method's return
+value.
 
-2 says a short press has been processed and the supplied value stored
-  at the previously supplied configuration address.
-
-3 says a short press has been processed in the absence of a prior
-  storage address.
-
-This return value can be used by the host application to prompt or
-otherwise signify to a user the state of an interaction protocol.
-
-In the case that an interaction has completed and a change handler was
-registered at instantiation then the change handler is invoked with the
-affected address and its new value as arguments.
+0  says that a short press has been processed but no prior array index
+   was available and no action has been taken.
+   Zero is also returned from a loop invocation when no action has been
+   taken.
+1  says a long press has been processed and the supplied value accepted
+   as a valid configuration array index.
+   Any subsequent short press value will be saved to this address.
+-1 says a long press has been processed but the suppied value was not
+   a valid configuration array index.
+2  says a short press has been processed and the supplied value validated
+   and stored at a previously supplied configuration address.
+-2 says a short press has been processed but the supplied value did not
+   validate and has not been stored in the configuration array.
+10 says that a loop invocation has timed out an interaction sequence and
+   the protocol reset. 
 
 ### saveByte(*index*)
 

@@ -30,6 +30,7 @@ unsigned char ModuleConfiguration::getByte(unsigned int index) {
 }
 
 /**********************************************************************
+ * 
  * 1   a long press interaction specified a valid address and interact
  *     is waiting for short press value to be supplied
  * 2   a short press interaction specified a value for a previously
@@ -51,6 +52,7 @@ int ModuleConfiguration::interact(int value, bool longPress) {
     if ((resetDeadline != 0UL) && (now > resetDeadline)) {
       address = -1;
       resetDeadline = 0UL;
+      retval = 10;
     }
   } else {
     switch (longPress) {
