@@ -29,19 +29,6 @@ unsigned char ModuleConfiguration::getByte(unsigned int index) {
   return(0xff);
 }
 
-/**********************************************************************
- * 
- * 1   a long press interaction specified a valid address and interact
- *     is waiting for short press value to be supplied
- * 2   a short press interaction specified a value for a previously
- *     supplied address and the value has been saved to the
- *     configuration.
- * 0   Interaction not dealt with. A short press was presented without
- *     a previous address. No action taken
- * -1  a long press interaction specified an out-of-range configuration
- *     address.
- */
-
 int ModuleConfiguration::interact(int value, bool longPress) {
   static long resetDeadline = 0UL;
   static int address = -1;
