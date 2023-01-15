@@ -1,3 +1,14 @@
 {
+    "editor.tokenColorCustomizations": {
+        "textmateRules": [
+          {
+            "name": "doxygen",
+            "scope": [ "source.cpp comment.block.documentation" ],
+            "settings": {
+              "foreground": "#BBBBBB",
+            }
+          }
+        ]
+      },
     "cmake.configureOnOpen": false
 }
