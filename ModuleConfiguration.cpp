@@ -29,38 +29,12 @@ unsigned char ModuleConfiguration::getByte(unsigned int index) {
   return(0xff);
 }
 
-int ModuleConfiguration::interact(int value, bool longPress) {
-  static long resetDeadline = 0UL;
-  static int address = -1;
-  long now = millis();
-  int retval = 0;
-   
-  if (value == 0xffff) { // Perhaps cancel a timed-out protocol.
-    if ((resetDeadline != 0UL) && (now > resetDeadline)) {
-      address = -1;
-      resetDeadline = 0UL;
-      retval = 10;
-    }
-  } else {
-    switch (longPress) {
-      case true:
-        if ((value >= 0) && (value < EEPROM.length())) {
-          address = value;
-          resetDeadline = (now + this->interactionTimeout);
-          retval = 1;
-        } else {
-          retval = -1;
-        }
-        break;
-      case false:
-        if (address != -1) {
-          retval = (this->setByte(address, (unsigned char) value))?2:-2;
-          address = -1;
-        }
-        break;
-    }
-  }
-  return(retval);
+bool ModuleConfiguration::validateAddress(unsigned char index) {
+  return(index < this->size);
+}
+
+bool ModuleConfiguration::processValue(unsigned char index, unsigned char value) {
+  return(this->setByte(index, value));
 }
 
 void ModuleConfiguration::saveByte(unsigned int index) {
@@ -73,4 +47,10 @@ void ModuleConfiguration::save() {
 
 void ModuleConfiguration::load() {
   EEPROM.get(this->eepromAddress, this->configuration);
+}
+
+void ModuleConfiguration::erase() {
+  for (unsigned int i = 0; i < this->size; i++) {
+    EEPROM.update((this->eepromAddress + i), 0xff);
+  }
 }

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
+#include "ModuleOperatorInterfaceClient.h"
 
 /**
  * @brief Representation of a byte array that can be used as a
@@ -11,7 +12,7 @@
  * A module configuration is modelled as a byte array indexed from
  * zero.
  */
-class ModuleConfiguration {
+class ModuleConfiguration: public ModuleOperatorInterfaceClient {
 
   public:
     /******************************************************************
@@ -58,45 +59,8 @@ class ModuleConfiguration {
      */
     unsigned char getByte(unsigned int index);
 
-    /******************************************************************
-     * @brief Process an interaction protocol event.
-     * 
-     * This rather specialised method is designed to support a style of
-     * user interaction predicated on the underlying presence of a
-     * register device (like a DIL-switch) that can be used to specify
-     * a value and a push-button that can be used to submit the value
-     * of the register by either a short-press or a long-press.
-     * 
-     * The interaction protocal supported by this method is one in which
-     * a long-press is used to specify an index in the configuration and
-     * an immediately subsequent short-press is used to specify a value
-     * which should be saved at the previously entered index.
-     * 
-     * @param value     - the register value being offered for
-     *                    processing. 
-     * @param longPress - whether value resulted from a long button
-     *                    press (in which case it is an candidate index)
-     *                    or from a short button press (in which case it
-     *                    is a putative value).
-     * @return int      - On success:
-     *                    1  a long button press supplied an index value
-     *                       which was valid. The next invocation with
-     *                       longPress equal to false should specify a
-     *                       value to be stored at the supplied index in
-     *                       configuration.
-     *                    2  a short button press supplied a value which
-     *                       has been saved at the previously specified
-     *                       index.
-     *                    0  a short button press supplied a value but no
-     *                       index had been previously specified.
-     * 
-     *                    On error:
-     *                    -1 a long button press supplied an invalid
-     *                       index.
-     *                    -2 a short button press supplied a value which
-     *                       failed validation by the validator callback. 
-     */
-    int interact(int value = 0xffff, bool longPress = false);
+    bool validateAddress(unsigned char index);
+    bool processValue(unsigned char address, unsigned char value);
 
     /******************************************************************
      * @brief Save a configuration byte to EEPROM using EEPROM.update().
@@ -114,6 +78,8 @@ class ModuleConfiguration {
      * @brief Load the entire configuration array from EEPROM.
      */
     void load();
+
+    void erase();
 
   private:
     unsigned char* (*initialiser)(int&, unsigned int);
