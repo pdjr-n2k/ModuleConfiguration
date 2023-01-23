@@ -1,4 +1,4 @@
-#include "ModuleConfiguration.h"
+#include <ModuleConfiguration.h>
 
 ModuleConfiguration::ModuleConfiguration(unsigned char* (*initialiser)(int&, unsigned int), bool (*validator)(unsigned int, unsigned char), unsigned int eepromAddress) {
   this->initialiser = initialiser;

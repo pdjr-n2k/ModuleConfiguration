@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
-#include "ModuleOperatorInterfaceClient.h"
+#include <ModuleOperatorInterfaceClient.h>
 
 /**
  * @brief Representation of a byte array that can be used as a
