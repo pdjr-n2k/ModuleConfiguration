@@ -7,16 +7,19 @@
 
 /**
  * @brief Representation of a byte array that can be used as a
- *        basis for firmware configuration.
- * 
- * A module configuration is modelled as a byte array indexed from
- * zero.
+ * basis for firmware configuration.
  */
 class ModuleConfiguration: public ModuleOperatorInterfaceClient {
 
   public:
     /******************************************************************
-     * @brief Construct a new Module Configuration object.
+     * @brief Construct a new ModuleConfiguration object.
+     *
+     * Creates a new ModuleConfiguration object by reading size bytes
+     * of data into configuration from EEPROM location eepromAddress.
+     * 
+     * If the read data appears to have been unconfigured, then the
+     * value of configuration is used.
      * 
      * @param configuration - byte array containing default configuration.
      * @param size          - size of configuration in bytes.
