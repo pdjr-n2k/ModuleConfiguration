@@ -72,20 +72,20 @@ class ModuleConfiguration: public ModuleOperatorInterfaceClient {
     void save();
 
     /******************************************************************
-     * @brief Load the entire configuration array from EEPROM.
+     * @brief Load the configuration from EEPROM.
      */
     void load();
 
+    /******************************************************************
+     * @brief Save the configuration to EEPROM.
+     */
     void erase();
 
   private:
-    unsigned char* (*initialiser)(int&, unsigned int);
-    bool (*validator)(unsigned int, unsigned char);
-    unsigned int eepromAddress;
-
-    unsigned long interactionTimeout = 30000UL;
     unsigned char *configuration = 0;
     unsigned int size = 0;
+    unsigned int eepromAddress;
+    bool (*validator)(unsigned int, unsigned char);
     
 };
 
