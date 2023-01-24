@@ -1,20 +1,20 @@
 #include <ModuleConfiguration.h>
 
-ModuleConfiguration::ModuleConfiguration(unsigned char* (*initialiser)(int&, unsigned int), bool (*validator)(unsigned int, unsigned char), unsigned int eepromAddress) {
-  this->initialiser = initialiser;
-  this->validator = validator;
-  this->eepromAddress = eepromAddress;
-}
-
-void ModuleConfiguration::setup() {
-  int size;
-
-  this->initialiser(size, this->eepromAddress);
+ModuleConfiguration::ModuleConfiguration(unsigned char *configuration, unsigned int size, unsigned int eepromAddress, bool (*validator)(unsigned int, unsigned char)) {
+  this->configuration = configuration;
   this->size = size;
+  this->eepromAddress = eepromAddress;
+  this->validator = validator;
+
+  if (EEPROM.read(this->eepromAddress) == 0xff) {
+    EEPROM.put(this->eepromAddress, this->configuration);
+  } else {
+    EEPROM.get(this->eepromAddress, this->configuration);
+  }
 }
 
 bool ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
-  if ((index < this->size) && (this->validator(index, value))) {
+  if ((index < this->size) && ((!this->validator) || (this->validator(index, value)))) {
     this->configuration[index] = value;
     this->saveByte(index);
     return(true);

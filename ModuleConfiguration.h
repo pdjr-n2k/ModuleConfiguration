@@ -18,21 +18,15 @@ class ModuleConfiguration: public ModuleOperatorInterfaceClient {
     /******************************************************************
      * @brief Construct a new Module Configuration object.
      * 
-     * @param initialiser   - callback function that will be used to
-     *                        load / default the module configuration.
+     * @param configuration - byte array containing default configuration.
+     * @param size          - size of configuration in bytes.
+     * @param eepromAddress - address in EEPROM where the configuration
+     *                        will be persisted.
      * @param validator     - callback function that will be used to
      *                        validate and approve every byte written
      *                        to the module configuration.
-     * @param eepromAddress - address in EEPROM where the configuration
-     *                        will be persisted.
      */    
-    ModuleConfiguration(unsigned char* (*initialiser)(int&, unsigned int), bool (*validator)(unsigned int, unsigned char), unsigned int eepromAddress = 0);
-
-    /******************************************************************
-     * @brief Initialise the configuration by executing the initialiser
-     *        callback.
-     */
-    void setup();
+    ModuleConfiguration(unsigned char *configuration, unsigned int size, unsigned int eepromAddress = 0, bool (*validator)(unsigned int, unsigned char) = 0);
 
     /******************************************************************
      * @brief Set a byte in the configuration from a value subject to
