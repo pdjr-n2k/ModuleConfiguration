@@ -16,7 +16,8 @@ class ModuleConfiguration: public ModuleOperatorInterfaceClient {
      * @brief Construct a new ModuleConfiguration object.
      *
      * Creates a new ModuleConfiguration object by reading size bytes
-     * of data into configuration from EEPROM location eepromAddress.
+     * of data into configuration from EEPROM location eepromAddress
+     * into the passed configuration buffer.
      * 
      * If the read data appears to have been unconfigured, then the
      * value of configuration is used.
