@@ -9,7 +9,7 @@
  * @brief Representation of a byte array that can be used as a
  * basis for firmware configuration.
  */
-class tModuleConfiguration: public tModuleOperatorInterfaceClient {
+class ModuleConfiguration: public ModuleOperatorInterfaceClient {
 
   public:
     /******************************************************************
@@ -30,7 +30,7 @@ class tModuleConfiguration: public tModuleOperatorInterfaceClient {
      *                        validate and approve every byte written
      *                        to the module configuration.
      */    
-    tModuleConfiguration(unsigned char *configuration, unsigned int size, unsigned int eepromAddress = 0, bool (*validator)(unsigned int, unsigned char) = 0);
+    ModuleConfiguration(unsigned char *configuration, unsigned int size, unsigned int eepromAddress = 0, bool (*validator)(unsigned int, unsigned char) = 0);
 
     /******************************************************************
      * @brief Set a byte in the configuration from a value subject to
