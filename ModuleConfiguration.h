@@ -6,79 +6,82 @@
 #include <ModuleOperatorInterfaceClient.h>
 
 /**
- * @brief Representation of a byte array that can be used as a
- * basis for firmware configuration.
+ * @brief ADT modelling an array of bytes intended for use as as a
+ * persistent repository of firmware configuration data.
+ * 
+ * A ModuleConfiguration instance must be initialised before use by a
+ * call to the initialise() method.
  */
 class ModuleConfiguration: public ModuleOperatorInterfaceClient {
 
   public:
-    /******************************************************************
+
+    /**
      * @brief Construct a new ModuleConfiguration object.
      *
-     * Creates a new ModuleConfiguration object by reading size bytes
-     * of data into configuration from EEPROM location eepromAddress
-     * into the passed configuration buffer.
+     * Create a new ModuleConfiguration instance from either an
+     * existing, previously saved, configuration or, if none exists,
+     * then from a supplied fallback.
      * 
-     * If the read data appears to have been unconfigured, then the
-     * value of configuration is used.
-     * 
-     * @param configuration - byte array containing default configuration.
-     * @param size          - size of configuration in bytes.
-     * @param eepromAddress - address in EEPROM where the configuration
-     *                        will be persisted.
-     * @param validator     - callback function that will be used to
-     *                        validate and approve every byte written
-     *                        to the module configuration.
+     * @param configuration - byte array containing a fallback configuration.
+     * @param size          - size of configuration array in bytes.
+     * @param eepromAddress - address in EEPROM where the configuration has been or will be persisted (optional: defaults to 0).
+     * @param validator     - callback function that can be used to validate bytes written to the module configuration (optional: defaults to none).
      */    
     ModuleConfiguration(unsigned char *configuration, unsigned int size, unsigned int eepromAddress = 0, bool (*validator)(unsigned int, unsigned char) = 0);
 
-    /******************************************************************
-     * @brief Set a byte in the configuration from a value subject to
-     *        approval by the validator callback.
+    /**
+     * @brief Set a byte in the configuration.
      * 
-     * @param index  - the index within the configuration where value
-     *                 should be saved.
-     * @param value  - the value to be saved - this will be passed to
-     *                 the validator callback for validation before
-     *                 being committed.
+     * If a /a validator function was specified when this instance was
+     * created then supplied bytes must be successfully validated
+     * before being saved.
+     * 
+     * @param index  - the index within the configuration where value should be saved.
+     * @param value  - the value to be saved.
      * @return true  - value was saved successfully.
-     * @return false - value was not saved because index was out of
-     *                 range or validation checks failed.
+     * @return false - value was not saved because \a index was out of range or \a value failed validation.
      */
     bool setByte(unsigned int index, unsigned char value);
 
-    /******************************************************************
+    /**
      * @brief Get a byte from the configuration.
      * 
-     * @param                - index within the configuration of the
-     *                         required value. 
-     * @return unsigned char - the retrieved byte or 0xff if index was
-     *                         out of range.
+     * @param index - the index within the configuration from where the requested byte should be retrieved. 
+     * @return unsigned char - the retrieved byte or 0xff if \a index was out of range.
      */
     unsigned char getByte(unsigned int index);
 
+    /**
+     * @brief Check that an index value is a valid configuration address.
+     * 
+     * @param index - the value to be validated.
+     * @return true - index is valid (in range).
+     * @return false - index is invalid (out of range).
+     */
     bool validateAddress(unsigned char index);
-    bool processValue(unsigned char address, unsigned char value);
 
     /******************************************************************
-     * @brief Save a configuration byte to EEPROM using EEPROM.update().
+     * @brief Save a configuration byte to persistent storage.
      * 
      * @param index - the index of the configuration byte to be saved. 
      */
     void saveByte(unsigned int index);
 
     /******************************************************************
-     * @brief Save the entire configuration array to EEPROM.
+     * @brief Save the entire configuration to persistent storage.
      */
     void save();
 
     /******************************************************************
-     * @brief Load the configuration from EEPROM.
+     * @brief Load the entire configuration from persistent storage.
      */
     void load();
 
     /******************************************************************
-     * @brief Save the configuration to EEPROM.
+     * @brief Erase the configuration from persistent storage.
+     * 
+     * The value 0xff will be writtem to every configuration byte.
      */
     void erase();
 

@@ -1,146 +1,90 @@
-# ModuleConfiguration
+# class `ModuleConfiguration` 
 
-Class implementing an array of bytes intended for use as a repository
-for firmware configuration data.
-Methods allow initialisation, interactive updates and use of persistent
-storage.
-
-A ModuleConfiguration instance must be initialised before use by a call
-to the initialise() method.
-
-## Callback functions
-
-### unsigned char *initialiser*(unsigned int *size*&, unsigned int *eepromAddress*)
-
-The *initialiser* function is called from the class constructor must
-both create and prepare an array of ```unsigned char`` which will be
-used to hold module configuration data.
-The function must return a pointer to the array and must also pass the
-size of the array through the *size* reference.
-
-Configuration data is often persisted to EEPROM and hence it will be
-desiarable to restore persisted values to the array as part of the
-initialisation process.
-
-The following example function creates a configuration array, recovers
-data from EEPROM and checks if the recovered data hs actually been saved
-and, if not, proceeds to initialise all array items to 0x00.
 ```
-#define CONFIGURATION_SIZE 20
+class ModuleConfiguration
+  : public ModuleOperatorInterfaceClient
+```  
 
-unsigned char *initialiser(unsigned int size&, unsigned int eepromAddress) {
-  static unsigned char buffer[] = new unsigned char(size = CONFIGURATION_SIZE);
-  EEPROM.get(eepromAddress, buffer);
-  if (buffer[0] == 0xff) {
-    for (insigned int i = 0; i < CONFIGURATION_SIZE; i++) {
-      buffer[i] = 0x00;
-    }
-  }
-  return(buffer);
-}
+ADT modelling an array of bytes intended for use as as a persistent repository of firmware configuration data.
 
-### bool *validator*(unsigned int *index*, unsigned char *value*)
+A [ModuleConfiguration](#classModuleConfiguration) instance must be initialised before use by a call to the initialise() method.
 
-The *validator* function is called from the setByte() method to
-allow the host application to validate *value* before it is assigned
-to configuration location *address*.
+## Summary
 
-If *validator* returns true, *value* will be saved, otherwise *value*
-will be discarded.
+ Members                        | Descriptions                                
+--------------------------------|---------------------------------------------
+`public  `[`ModuleConfiguration`](#classModuleConfiguration_1aad4e3aceb58c78b181b4c8003f375604)`(unsigned char * configuration,unsigned int size,unsigned int eepromAddress,bool(*)(unsigned int, unsigned char) validator)` | Construct a new [ModuleConfiguration](#classModuleConfiguration) object.
+`public bool `[`setByte`](#classModuleConfiguration_1a5f51200e01e2c4c3a09d75e638e965fe)`(unsigned int index,unsigned char value)` | Set a byte in the configuration.
+`public unsigned char `[`getByte`](#classModuleConfiguration_1a49af831c912482a6e21afe817dc6987e)`(unsigned int index)` | Get a byte from the configuration.
+`public bool `[`validateAddress`](#classModuleConfiguration_1a990a5e8ebfa2f46d0c0879ffaeed8b61)`(unsigned char index)` | Check that an index value is a valid configuration address.
+`public void `[`saveByte`](#classModuleConfiguration_1afcb5191a28a9ef3c446f36718a26ac1e)`(unsigned int index)` | 
+`public void `[`save`](#classModuleConfiguration_1a007d17f1033780a4b47596f7e0c8261c)`()` | 
+`public void `[`load`](#classModuleConfiguration_1ad04ac9099049e8609cb9173a0f38ec6c)`()` | 
+`public void `[`erase`](#classModuleConfiguration_1ab6065f381e469a40e9ac9ac24fc31c82)`()` | 
 
-The following example function with accept all data values which are
-even numbers.
-```
-bool validator(unsigned int index, unsigned char value) {
-  return(!(value & 0x01));
-}
-```
+## Members
 
-## CONSTRUCTORS
+#### `public  `[`ModuleConfiguration`](#classModuleConfiguration_1aad4e3aceb58c78b181b4c8003f375604)`(unsigned char * configuration,unsigned int size,unsigned int eepromAddress,bool(*)(unsigned int, unsigned char) validator)` 
 
-### ModuleConfiguration(*initialiser*, *validator*)
+Construct a new [ModuleConfiguration](#classModuleConfiguration) object.
 
-Create a new ModuleConfiguration instance with an EEPROM storage
-address of 0.
-*initialiser* is a callback function which will be used to prepare
-the configuration for use.
-*validator* is a callback function which will be used to validate
-data values before they are assigned to the configuration.  
+Create a new [ModuleConfiguration](#classModuleConfiguration) instance from either an existing, previously saved, configuration or, if none exists, then from a supplied fallback.
 
-### ModuleConfiguration(*initialiser*, *validator*, *eepromAddress*)
+#### Parameters
+* `configuration` - byte array containing a fallback configuration. 
 
-Create a new ModuleConfiguration instance with an EEPROM storage
-address specified by unsigned int *eepromAddress*.
-*initialiser* is a callback function which will be used to prepare
-the configuration for use.
-*validator* is a callback function which will be used to validate
-data values before they are assigned to the configuration.  
+* `size` - size of configuration array in bytes. 
 
-## METHODS
+* `eepromAddress` - address in EEPROM where the configuration has been or will be persisted (optional: defaults to 0). 
 
-### setByte(*index*, *value*)
+* `validator` - callback function that can be used to validate bytes written to the module configuration (optional: defaults to none).
 
-Validate *value* using the *validator* function declared at
-instantiation and, if *validator* returns true, save *value* to
-configuration location *index*. 
+#### `public bool `[`setByte`](#classModuleConfiguration_1a5f51200e01e2c4c3a09d75e638e965fe)`(unsigned int index,unsigned char value)` 
 
-### getByte(*index*)
+Set a byte in the configuration.
 
-Return the configuration byte stored at configuration location
-*index*.
+If a /a validator function was specified when this instance was created then supplied bytes must be successfully validated before being saved.
 
-### interact(*value*, *longPress*)
+#### Parameters
+* `index` - the index within the configuration where value should be saved. 
 
-The method supports a two-step data entry protocal that can be used to
-update values in the module configuration array.
-Data is assumed to derive from an input register (most likely a DIL
-switch) and the interact() the method to be invoked by operation of a
-push-button.
-The method expects to be invoked each time the push-button is operated.
-Additionally, because the method implements a timeout mechanism, the
-method must be called from loop with no arguments.
+* `value` - the value to be saved. 
 
-The supported protocol takes a long-button press to signify entry of a
-configuration array index and a short button press to signify entry of
-an array value.
-Together, the sequential entry of an index followed by a value supplies
-the data required for an array update.
+#### Returns
+true - value was saved successfully. 
 
-If a data value does not follow an index value withing 30 seconds then
-the supplied index is discarded and the protocol reset.
-If a data value is entered without a preceeding index, then the supplied
-value is ignored and an exception reported.
+#### Returns
+false - value was not saved because *index* was out of range or *value* failed validation.
 
-The status of protocol processing is indicated by the method's return
-value.
+#### `public unsigned char `[`getByte`](#classModuleConfiguration_1a49af831c912482a6e21afe817dc6987e)`(unsigned int index)` 
 
-0  says that a short press has been processed but no prior array index
-   was available and no action has been taken.
-   Zero is also returned from a loop invocation when no action has been
-   taken.
-1  says a long press has been processed and the supplied value accepted
-   as a valid configuration array index.
-   Any subsequent short press value will be saved to this address.
--1 says a long press has been processed but the suppied value was not
-   a valid configuration array index.
-2  says a short press has been processed and the supplied value validated
-   and stored at a previously supplied configuration address.
--2 says a short press has been processed but the supplied value did not
-   validate and has not been stored in the configuration array.
-10 says that a loop invocation has timed out an interaction sequence and
-   the protocol reset. 
+Get a byte from the configuration.
 
-### saveByte(*index*)
+#### Parameters
+* `index` - the index within the configuration from where the requested byte should be retrieved. 
 
-Save the configuration byte at *index* to EEPROM using the EEPROM
-library's update() method.
+#### Returns
+unsigned char - the retrieved byte or 0xff if *index* was out of range.
 
-### save()
+#### `public bool `[`validateAddress`](#classModuleConfiguration_1a990a5e8ebfa2f46d0c0879ffaeed8b61)`(unsigned char index)` 
 
-Save the configuration array to EEPROM using the EEPROM library's
-put() method.
+Check that an index value is a valid configuration address.
 
-### load()
+#### Parameters
+* `index` - the value to be validated. 
 
-Load the configuration array from EEPROM using the EEPROM library's
-get() method.
+#### Returns
+true - index is valid (in range). 
+
+#### Returns
+false - index is invalid (out of range).
+
+#### `public void `[`saveByte`](#classModuleConfiguration_1afcb5191a28a9ef3c446f36718a26ac1e)`(unsigned int index)` 
+
+#### `public void `[`save`](#classModuleConfiguration_1a007d17f1033780a4b47596f7e0c8261c)`()` 
+
+#### `public void `[`load`](#classModuleConfiguration_1ad04ac9099049e8609cb9173a0f38ec6c)`()` 
+
+#### `public void `[`erase`](#classModuleConfiguration_1ab6065f381e469a40e9ac9ac24fc31c82)`()` 
+
+Generated by [Moxygen](https://sourcey.com/moxygen)

@@ -23,18 +23,11 @@ bool ModuleConfiguration::setByte(unsigned int index, unsigned char value) {
 }
 
 unsigned char ModuleConfiguration::getByte(unsigned int index) {
-  if (index < this->size) {
-    return(this->configuration[index]);
-  }
-  return(0xff);
+  return((index < this->size)?this->configuration[index]:0xff);
 }
 
 bool ModuleConfiguration::validateAddress(unsigned char index) {
   return(index < this->size);
-}
-
-bool ModuleConfiguration::processValue(unsigned char index, unsigned char value) {
-  return(this->setByte(index, value));
 }
 
 void ModuleConfiguration::saveByte(unsigned int index) {
