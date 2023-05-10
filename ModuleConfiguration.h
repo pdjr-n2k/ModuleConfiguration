@@ -59,7 +59,12 @@ class ModuleConfiguration: public ModuleOperatorInterfaceClient {
      * @return true - index is valid (in range).
      * @return false - index is invalid (out of range).
      */
-    bool validateAddress(unsigned char index);
+    bool validateAddress(unsigned int index);
+
+    /**
+     * @brief Alias for setByte().
+     */
+    bool processValue(unsigned int index, unsigned char value);
 
     /******************************************************************
      * @brief Save a configuration byte to persistent storage.

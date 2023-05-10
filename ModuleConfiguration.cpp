@@ -26,10 +26,6 @@ unsigned char ModuleConfiguration::getByte(unsigned int index) {
   return((index < this->size)?this->configuration[index]:0xff);
 }
 
-bool ModuleConfiguration::validateAddress(unsigned char index) {
-  return(index < this->size);
-}
-
 void ModuleConfiguration::saveByte(unsigned int index) {
   EEPROM.update(this->eepromAddress + index, this->configuration[index]);
 }
