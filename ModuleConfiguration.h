@@ -6,8 +6,10 @@
 #include <ModuleOperatorInterfaceClient.h>
 
 /**
- * @brief ADT modelling an array of bytes intended for use as as a
- * persistent repository of firmware configuration data.
+ * @brief ADT implementing a persistent repository of firmware configuration data.
+ * 
+ * This class implements the ModuleOperatorInterfaceClient interface
+ * and can be used as a mode handler with ModuleOperatorInterface.
  * 
  * A ModuleConfiguration instance must be initialised before use by a
  * call to the initialise() method.
@@ -53,16 +55,27 @@ class ModuleConfiguration: public ModuleOperatorInterfaceClient {
     unsigned char getByte(unsigned int index);
 
     /**
-     * @brief Check that an index value is a valid configuration address.
+     * @brief Validate an index (address).
+     *
+     * This method is part of the ModuleOperatorInterfaceClient
+     * interface.
      * 
-     * @param index - the value to be validated.
-     * @return true - index is valid (in range).
-     * @return false - index is invalid (out of range).
+     * @param index - the index/address value to be checked.
+     * @return true - the index is a valid address.
+     * @return false - the index is out of range.
      */
     bool validateAddress(unsigned int index);
 
     /**
-     * @brief Alias for setByte().
+     * @brief Insert a value into the configuration.
+     * 
+     * This method is part of the ModuleOperatorInterfaceClient
+     * interface.
+     * 
+     * @param index - the index in the configuration where \a value should be saved. 
+     * @param value - the value to be stored.
+     * @return true - \a value was saved and persisted in the configuration.
+     * @return false - insert rejected (\a value is invalid or \a index out of range).
      */
     bool processValue(unsigned int index, unsigned char value);
 
