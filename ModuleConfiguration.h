@@ -35,7 +35,7 @@ class ModuleConfiguration: public ModuleOperatorInterfaceClient {
     /**
      * @brief Set a byte in the configuration.
      * 
-     * If a /a validator function was specified when this instance was
+     * If a \a validator function was specified when this instance was
      * created then supplied bytes must be successfully validated
      * before being saved.
      * 
