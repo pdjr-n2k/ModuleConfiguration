@@ -6,13 +6,10 @@
 #include <ModuleOperatorInterfaceClient.h>
 
 /**
- * @brief ADT implementing a persistent repository of firmware configuration data.
+ * @brief ADT implementing a firmware configuration manager.
  * 
- * This class implements the ModuleOperatorInterfaceClient interface
- * and can be used as a mode handler with ModuleOperatorInterface.
- * 
- * A ModuleConfiguration instance must be initialised before use by a
- * call to the initialise() method.
+ * This class can be used as a standalone configuration manager or as a
+ * plugin for the ModuleOperatorInterface class.
  */
 class ModuleConfiguration: public ModuleOperatorInterfaceClient {
 
